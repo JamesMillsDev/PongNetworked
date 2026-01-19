@@ -1,7 +1,8 @@
-﻿namespace Pong.Networking
+﻿using System.Net;
+
+namespace Pong.Networking
 {
-	// TODO: This
-	public class NetworkClient : Network
+	public class NetworkClient() : Network(Dns.GetHostName())
 	{
 		public override Task Poll()
 		{

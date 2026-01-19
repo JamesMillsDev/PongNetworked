@@ -8,37 +8,74 @@ namespace Pong.Networking
 	{
 		private readonly Dictionary<string, Type> registeredPackets = new();
 
-		private readonly IPHostEntry ipHost;
-		private readonly IPAddress ipAddr;
-		private readonly IPEndPoint localEndPoint;
-
-		private readonly Socket listener;
 		private readonly List<Socket> clients = [];
 
-		public NetworkServer()
+		public NetworkServer() : base(Dns.GetHostName())
 		{
-			this.ipHost = Dns.GetHostEntry(Dns.GetHostName());
-			this.ipAddr = this.ipHost.AddressList[0];
-			this.localEndPoint = new IPEndPoint(ipAddr, 25565);
-
-			this.listener = new Socket(this.ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-			this.listener.Bind(this.localEndPoint);
-			this.listener.Listen(10);
+			_ = Task.Run(async () =>
+			{
+				try
+				{
+					await AwaitConnections();
+				}
+				catch (Exception e)
+				{
+					Console.WriteLine(e);
+				}
+			});
 		}
 
 		public bool RegisterPacket(Packet packet) => this.registeredPackets.TryAdd(packet.ID, packet.GetType());
 
-		public async Task AwaitClientConnection()
-		{
-			Task<Socket> clientSocket = this.listener.AcceptAsync();
-			await clientSocket;
-
-			this.clients.Add(clientSocket.Result);
-		}
-
 		public override async Task Poll()
 		{
+			List<Socket> connected = [];
+			lock (this.clients)
+			{
+				connected.AddRange(this.clients);
+			}
+
+			List<Task<Tuple<string, byte[]>>> reading = [];
+			reading.AddRange(connected.Select(ReadPacket));
+
+			// ReSharper disable once CoVariantArrayConversion
+			await Task.WhenAll(reading.ToArray());
+
+			foreach ((string id, byte[] payload) in reading.Select(task => task.Result))
+			{
+				if (!this.registeredPackets.TryGetValue(id, out Type? packetType))
+				{
+					Console.WriteLine($"No packet with id {id} found.");
+					continue;
+				}
+
+				PacketReader reader = new(payload);
+				Packet packet = (Packet)Activator.CreateInstance(packetType, id)!;
+
+				packet.Deserialize(reader);
+				packet.Process();
+			}
+
+			await Task.Delay(20);
+		}
+
+		private async Task AwaitConnections()
+		{
+			if (this.socket == null)
+			{
+				throw new InvalidOperationException("Socket not connected!");
+			}
 			
+			while (true)
+			{
+				Task<Socket> clientSocket = this.socket.AcceptAsync();
+				await clientSocket;
+
+				lock (this.clients)
+				{
+					this.clients.Add(clientSocket.Result);
+				}
+			}
 		}
 	}
 }
