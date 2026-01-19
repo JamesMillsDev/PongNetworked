@@ -16,23 +16,11 @@ namespace Pong.Networking
 		/// </summary>
 		public static Network? Instance { get; private set; }
 
-		/// <summary>
-		/// Creates and initializes a new network server instance.
-		/// </summary>
-		public static void CreateServer()
-		{
-			Instance = new NetworkServer();
-			Instance.Open();
-		}
+		/// <summary> Creates and initializes a new network server instance. </summary>
+		public static void CreateServer() => Instance = new NetworkServer();
 
-		/// <summary>
-		/// Creates and initializes a new network client instance.
-		/// </summary>
-		public static void CreateClient()
-		{
-			Instance = new NetworkClient();
-			Instance.Open();
-		}
+		/// <summary> Creates and initializes a new network client instance. </summary>
+		public static void CreateClient() => Instance = new NetworkClient();
 
 		/// <summary>
 		/// Parses a packet buffer to extract the packet ID and payload data.
@@ -178,16 +166,28 @@ namespace Pong.Networking
 			target.Send(data);
 		}
 
-		protected readonly IPHostEntry ipHost;
-		protected readonly IPAddress ipAddr;
-		protected readonly IPEndPoint localEndPoint;
+		/// <summary> The IP address resolved from the hostname provided in the constructor. </summary>
+		private readonly IPAddress ipAddr;
+		
+		/// <summary> The local endpoint combining the IP address and port number. </summary>
+		private readonly IPEndPoint localEndPoint;
 
+		/// <summary>
+		/// The underlying socket used for network communication.
+		/// Null until <see cref="Open"/> is called.
+		/// </summary>
 		protected Socket? socket;
 
+		/// <summary>
+		/// Initializes a new instance of the Network class with the specified hostname and port.
+		/// Resolves the hostname to an IP address and creates an endpoint.
+		/// </summary>
+		/// <param name="hostName">The hostname to resolve (e.g., "localhost" or a domain name).</param>
+		/// <param name="port">The port number to use for the connection. Defaults to 25565 (Minecraft's default port).</param>
 		protected Network(string hostName, int port = 25565)
 		{
-			this.ipHost = Dns.GetHostEntry(hostName);
-			this.ipAddr = this.ipHost.AddressList[0];
+			IPHostEntry ipHost = Dns.GetHostEntry(hostName);
+			this.ipAddr = ipHost.AddressList[0];
 			this.localEndPoint = new IPEndPoint(ipAddr, port);
 
 			this.socket = null;
@@ -200,6 +200,11 @@ namespace Pong.Networking
 		/// <returns>A task representing the asynchronous poll operation.</returns>
 		public abstract Task Poll();
 
+		/// <summary>
+		/// Opens the socket, binds it to the local endpoint, and starts listening for connections.
+		/// This is typically called by server implementations.
+		/// </summary>
+		/// <param name="backlog">The maximum length of the pending connections queue. Defaults to 10.</param>
 		public void Open(int backlog = 10)
 		{
 			this.socket = new Socket(this.ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -207,13 +212,17 @@ namespace Pong.Networking
 			this.socket.Listen(backlog);
 		}
 
+		/// <summary>
+		/// Gracefully shuts down and closes the socket connection.
+		/// </summary>
+		/// <exception cref="InvalidOperationException">Thrown when attempting to close a socket that is not connected.</exception>
 		public void Close()
 		{
 			if (this.socket == null)
 			{
 				throw new InvalidOperationException("Socket not connected");
 			}
-			
+
 			this.socket.Shutdown(SocketShutdown.Both);
 			this.socket.Close();
 		}
