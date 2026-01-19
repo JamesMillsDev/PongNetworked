@@ -11,7 +11,7 @@ namespace Pong
 			{
 				try
 				{
-					await NetworkLoop(isServer);
+					await NetworkLoop(isServer, args[1]);
 				}
 				catch (Exception e)
 				{
@@ -21,7 +21,7 @@ namespace Pong
 			});
 		}
 
-		private static async Task NetworkLoop(bool isServer)
+		private static async Task NetworkLoop(bool isServer, string endpoint)
 		{
 			if (isServer)
 			{
@@ -29,7 +29,7 @@ namespace Pong
 			}
 			else
 			{
-				Network.CreateClient();
+				Network.CreateClient(endpoint);
 			}
 
 			if (Network.Instance == null)

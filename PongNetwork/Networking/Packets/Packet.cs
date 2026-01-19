@@ -8,6 +8,6 @@
 
 		public abstract void Deserialize(PacketReader reader);
 
-		public abstract void Process();
+		public abstract Task Process();
 	}
 }

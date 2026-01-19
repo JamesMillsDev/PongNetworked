@@ -20,7 +20,7 @@ namespace Pong.Networking
 		public static void CreateServer() => Instance = new NetworkServer();
 
 		/// <summary> Creates and initializes a new network client instance. </summary>
-		public static void CreateClient() => Instance = new NetworkClient();
+		public static void CreateClient(string endpoint, int port = 25565) => Instance = new NetworkClient(endpoint, port);
 
 		/// <summary>
 		/// Parses a packet buffer to extract the packet ID and payload data.
@@ -173,10 +173,13 @@ namespace Pong.Networking
 		protected Socket? socket;
 
 		/// <summary> The IP address resolved from the hostname provided in the constructor. </summary>
-		private readonly IPAddress ipAddr;
+		protected readonly IPAddress ipAddr;
 		
 		/// <summary> The local endpoint combining the IP address and port number. </summary>
-		private readonly IPEndPoint localEndPoint;
+		protected readonly IPEndPoint localEndPoint;
+
+		/// <summary> The rate at which the <see cref="Poll"/> function will run. </summary>
+		protected readonly int pollRate;
 		
 		/// <summary>
 		/// The list of valid packets that can be sent / received on the network.
@@ -189,13 +192,15 @@ namespace Pong.Networking
 		/// </summary>
 		/// <param name="hostName">The hostname to resolve (e.g., "localhost" or a domain name).</param>
 		/// <param name="port">The port number to use for the connection. Defaults to 25565 (Minecraft's default port).</param>
-		protected Network(string hostName, int port = 25565)
+		/// <param name = "pollRate">How often the network should poll for changes. See: <see cref="Poll"/></param>
+		protected Network(string hostName, int port = 25565, int pollRate = 20)
 		{
 			IPHostEntry ipHost = Dns.GetHostEntry(hostName);
 			this.ipAddr = ipHost.AddressList[0];
 			this.localEndPoint = new IPEndPoint(ipAddr, port);
 
 			this.socket = null;
+			this.pollRate = pollRate;
 		}
 
 		/// <summary>
@@ -210,12 +215,7 @@ namespace Pong.Networking
 		/// This is typically called by server implementations.
 		/// </summary>
 		/// <param name="backlog">The maximum length of the pending connections queue. Defaults to 10.</param>
-		public void Open(int backlog = 10)
-		{
-			this.socket = new Socket(this.ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-			this.socket.Bind(this.localEndPoint);
-			this.socket.Listen(backlog);
-		}
+		public abstract void Open(int backlog = 10);
 
 		/// <summary>
 		/// Gracefully shuts down and closes the socket connection.

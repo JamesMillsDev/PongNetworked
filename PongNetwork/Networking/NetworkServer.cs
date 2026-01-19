@@ -42,23 +42,27 @@ namespace Pong.Networking
 				}
 
 				PacketReader reader = new(payload);
-				packet?.Deserialize(reader);
-				packet?.Process();
+				packet!.Deserialize(reader);
+				await packet.Process();
 			}
 
-			await Task.Delay(20);
+			await Task.Delay(this.pollRate);
+		}
+
+		public override void Open(int backlog = 10)
+		{
+			this.socket = new Socket(this.ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+			this.socket.Bind(this.localEndPoint);
+			this.socket.Listen(backlog);
 		}
 
 		private async Task AwaitConnections()
 		{
-			if (this.socket == null)
-			{
-				throw new InvalidOperationException("Socket not connected!");
-			}
+			await Tasks.While(() => this.socket == null);
 			
 			while (true)
 			{
-				Task<Socket> clientSocket = this.socket.AcceptAsync();
+				Task<Socket> clientSocket = this.socket!.AcceptAsync();
 				await clientSocket;
 
 				lock (this.connections)
