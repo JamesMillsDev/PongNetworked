@@ -64,14 +64,14 @@ namespace Pong.Networking.Packets
 			if (type == typeof(string))
 			{
 				byte[] bytes = Encoding.UTF8.GetBytes((string)data);
-				byte[] serialized = new byte[bytes.Length + 1];
-				bytes[0] = (byte)bytes.Length;
-				Array.Copy(bytes, 0, serialized, 1, bytes.Length);
+				byte[] serialized = new byte[bytes.Length + sizeof(int)];
+				Array.Copy(BitConverter.GetBytes(bytes.Length), serialized, sizeof(int));
+				Array.Copy(bytes, 0, serialized, sizeof(int), bytes.Length);
 
-				return bytes;
+				return serialized;
 			}
 
-			if (type == typeof(IPacketSerializable))
+			if (typeof(IPacketSerializable).IsAssignableFrom(type))
 			{
 				return ((IPacketSerializable)data).Serialize();
 			}

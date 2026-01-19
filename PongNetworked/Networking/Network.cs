@@ -15,7 +15,7 @@
 
 		public static void CreateClient()
 		{
-			
+			Instance = new NetworkClient();
 		}
 	}
 }
