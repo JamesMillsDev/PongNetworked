@@ -9,4 +9,8 @@
         <RootNamespace>Pong</RootNamespace>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\PongNetwork\PongNetwork.csproj" />
+    </ItemGroup>
+
 </Project>

@@ -166,17 +166,22 @@ namespace Pong.Networking
 			target.Send(data);
 		}
 
-		/// <summary> The IP address resolved from the hostname provided in the constructor. </summary>
-		private readonly IPAddress ipAddr;
-		
-		/// <summary> The local endpoint combining the IP address and port number. </summary>
-		private readonly IPEndPoint localEndPoint;
-
 		/// <summary>
 		/// The underlying socket used for network communication.
 		/// Null until <see cref="Open"/> is called.
 		/// </summary>
 		protected Socket? socket;
+
+		/// <summary> The IP address resolved from the hostname provided in the constructor. </summary>
+		private readonly IPAddress ipAddr;
+		
+		/// <summary> The local endpoint combining the IP address and port number. </summary>
+		private readonly IPEndPoint localEndPoint;
+		
+		/// <summary>
+		/// The list of valid packets that can be sent / received on the network.
+		/// </summary>
+		private readonly Dictionary<string, Type> registeredPackets = new();
 
 		/// <summary>
 		/// Initializes a new instance of the Network class with the specified hostname and port.
@@ -225,6 +230,35 @@ namespace Pong.Networking
 
 			this.socket.Shutdown(SocketShutdown.Both);
 			this.socket.Close();
+		}
+
+		/// <summary>
+		/// Registers a packet type to the internal tracker.
+		/// </summary>
+		/// <param name="id">The ID for the packet. Must match the variable <see cref="Packet.ID"/>.</param>
+		/// <param name="type">The type of the packet.</param>
+		/// <returns>Whether the packet was successfully added.</returns>
+		public bool RegisterPacket(string id, Type type) => this.registeredPackets.TryAdd(id, type);
+		
+		/// <summary>
+		/// Attempts to create and get a packet for the passed id.
+		/// </summary>
+		/// <param name="id">The ID for the packet we are attempting to make</param>
+		/// <param name="packet">The created packet. Will be null if <see cref="id"/> is an invalid id.</param>
+		/// <returns>True if a packet was successfully created, false if it wasn't.</returns>
+		protected bool TryMakePacketFor(string id, out Packet? packet)
+		{
+			// Attempt to get the packet type from the included dictionary
+			if (!this.registeredPackets.TryGetValue(id, out Type? type))
+			{
+				Console.WriteLine($"No packet with id {id} found.");
+				packet = null;
+				return false;
+			}
+			
+			// Create and return the packet
+			packet = (Packet)Activator.CreateInstance(type, id)!;
+			return true;
 		}
 	}
 }

@@ -6,9 +6,7 @@ namespace Pong.Networking
 {
 	public class NetworkServer : Network
 	{
-		private readonly Dictionary<string, Type> registeredPackets = new();
-
-		private readonly List<Socket> clients = [];
+		private readonly List<Socket> connections = [];
 
 		public NetworkServer() : base(Dns.GetHostName())
 		{
@@ -25,35 +23,27 @@ namespace Pong.Networking
 			});
 		}
 
-		public bool RegisterPacket(Packet packet) => this.registeredPackets.TryAdd(packet.ID, packet.GetType());
-
 		public override async Task Poll()
 		{
 			List<Socket> connected = [];
-			lock (this.clients)
+			lock (this.connections)
 			{
-				connected.AddRange(this.clients);
+				connected.AddRange(this.connections);
 			}
 
-			List<Task<Tuple<string, byte[]>>> reading = [];
-			reading.AddRange(connected.Select(ReadPacket));
-
-			// ReSharper disable once CoVariantArrayConversion
+			List<Task<Tuple<string, byte[]>>> reading = new(connected.Select(ReadPacket));
 			await Task.WhenAll(reading.ToArray());
 
 			foreach ((string id, byte[] payload) in reading.Select(task => task.Result))
 			{
-				if (!this.registeredPackets.TryGetValue(id, out Type? packetType))
+				if (!TryMakePacketFor(id, out Packet? packet))
 				{
-					Console.WriteLine($"No packet with id {id} found.");
 					continue;
 				}
 
 				PacketReader reader = new(payload);
-				Packet packet = (Packet)Activator.CreateInstance(packetType, id)!;
-
-				packet.Deserialize(reader);
-				packet.Process();
+				packet?.Deserialize(reader);
+				packet?.Process();
 			}
 
 			await Task.Delay(20);
@@ -71,9 +61,9 @@ namespace Pong.Networking
 				Task<Socket> clientSocket = this.socket.AcceptAsync();
 				await clientSocket;
 
-				lock (this.clients)
+				lock (this.connections)
 				{
-					this.clients.Add(clientSocket.Result);
+					this.connections.Add(clientSocket.Result);
 				}
 			}
 		}
