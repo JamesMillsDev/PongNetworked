@@ -1,5 +1,4 @@
-﻿using System.Net.Sockets;
-using System.Text;
+﻿using System.Text;
 
 namespace Pong.Networking.Packets
 {
@@ -78,16 +77,15 @@ namespace Pong.Networking.Packets
 
 			throw new NotSupportedException($"Type {type} is not supported.");
 		}
-		
-		private readonly byte[] serialized;
+
 		private readonly MemoryStream stream;
 
-		public PacketWriter(int maxDataSize)
+		public PacketWriter(string id)
 		{
-			this.serialized = new byte[maxDataSize];
-			this.stream = new MemoryStream(this.serialized);
+			this.stream = new MemoryStream();
+			Write(id);
 		}
-		
+
 		public void Write(object data)
 		{
 			if (!this.stream.CanWrite)
@@ -98,19 +96,19 @@ namespace Pong.Networking.Packets
 			this.stream.Write(Serialize(data));
 		}
 
-		public void Send(Socket sender) => sender.Send(this.serialized);
-
+		public byte[] GetBytes() => this.stream.ToArray();
+		
 		public void Dispose()
 		{
 			this.stream.Dispose();
-			
+
 			GC.SuppressFinalize(this);
 		}
 
 		public async ValueTask DisposeAsync()
 		{
 			await this.stream.DisposeAsync();
-			
+
 			GC.SuppressFinalize(this);
 		}
 	}

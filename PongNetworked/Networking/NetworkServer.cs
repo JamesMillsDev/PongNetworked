@@ -4,7 +4,7 @@ using Pong.Networking.Packets;
 
 namespace Pong.Networking
 {
-	public class NetworkServer : INetwork
+	public class NetworkServer : Network
 	{
 		private readonly Dictionary<string, Type> registeredPackets = new();
 
@@ -36,36 +36,9 @@ namespace Pong.Networking
 			this.clients.Add(clientSocket.Result);
 		}
 
-		public async Task Poll()
+		public override async Task Poll()
 		{
-			List<Tuple<Task, byte[]>> polled = [];
-			polled.AddRange(this.clients.Select(clientSocket => PollClient(clientSocket)));
-
-			foreach ((Task task, byte[] data) in polled)
-			{
-				await task;
-				
-				PacketReader reader = new(data);
-				string id = reader.ReadString();
-				if (!this.registeredPackets.TryGetValue(id, out Type? packetType))
-				{
-					Console.WriteLine($"Received packed with unknown id '{id}'. Ignoring");
-					continue;
-				}
-				
-				Packet packet = (Packet)Activator.CreateInstance(packetType, id)!;
-				packet.Deserialize(reader);
-				
-				packet.Process();
-			}
-		}
-
-		private Tuple<Task, byte[]> PollClient(Socket client, int bufferSize = 1024)
-		{
-			byte[] buffer = new byte[bufferSize];
-			Task<int> readTask = client.ReceiveAsync(buffer);
 			
-			return new Tuple<Task, byte[]>(readTask, buffer);
 		}
 	}
 }

@@ -1,9 +1,9 @@
 ﻿namespace Pong.Networking
 {
 	// TODO: This
-	public class NetworkClient : INetwork
+	public class NetworkClient : Network
 	{
-		public Task Poll()
+		public override Task Poll()
 		{
 			return Task.CompletedTask;
 		}
