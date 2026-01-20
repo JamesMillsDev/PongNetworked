@@ -172,6 +172,8 @@ namespace Pong.Networking
 
 			target.Send(data);
 		}
+		
+		public bool IsHost { get; protected set; } = false;
 
 		/// <summary>
 		/// The underlying socket used for network communication.
@@ -224,11 +226,21 @@ namespace Pong.Networking
 		/// <param name="backlog">The maximum length of the pending connections queue. Defaults to 10.</param>
 		public abstract void Open(int backlog = 10);
 
+		public void SendPacket(Packet packet)
+		{
+			if (this.socket == null)
+			{
+				return;
+			}
+			
+			SendPacket(packet, this.socket);
+		}
+
 		/// <summary>
 		/// Gracefully shuts down and closes the socket connection.
 		/// </summary>
 		/// <exception cref="InvalidOperationException">Thrown when attempting to close a socket that is not connected.</exception>
-		public void Close()
+		public virtual void Close()
 		{
 			if (this.socket == null)
 			{

@@ -1,5 +1,4 @@
-﻿using System.Net;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 using Pong.Networking.Packets;
 
 namespace Pong.Networking
@@ -7,9 +6,12 @@ namespace Pong.Networking
 	public class NetworkServer : Network
 	{
 		private readonly List<Socket> connections = [];
+		private bool isClosing = false;
 
 		public NetworkServer(string host, int port = 25565) : base(host, port)
 		{
+			IsHost = true;
+			
 			_ = Task.Run(async () =>
 			{
 				try
@@ -21,6 +23,17 @@ namespace Pong.Networking
 					Console.WriteLine(e);
 				}
 			});
+		}
+
+		public void BroadcastPacket(Packet packet)
+		{
+			lock (connections)
+			{
+				foreach (Socket connection in connections)
+				{
+					SendPacket(packet, connection);
+				}
+			}
 		}
 
 		public override async Task Poll()
@@ -56,11 +69,18 @@ namespace Pong.Networking
 			this.socket.Listen(backlog);
 		}
 
+		public override void Close()
+		{
+			base.Close();
+
+			this.isClosing = true;
+		}
+
 		private async Task AwaitConnections()
 		{
 			await Tasks.While(() => this.socket == null);
 			
-			while (true)
+			while (!this.isClosing)
 			{
 				Task<Socket> clientSocket = this.socket!.AcceptAsync();
 				await clientSocket;
