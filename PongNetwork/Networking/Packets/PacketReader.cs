@@ -115,11 +115,6 @@ namespace Pong.Networking.Packets
 			return packetSerializable;
 		}
 
-		private byte[] ReadBytes(int count)
-		{
-			byte[] buffer = new byte[count];
-			this.stream.ReadExactly(buffer, 0, count);
-			return buffer;
-		}
+		private byte[] ReadBytes(int count) => this.stream.ReadBytes(count);
 	}
 }
