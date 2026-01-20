@@ -13,4 +13,8 @@
       <ProjectReference Include="..\PongNetwork\PongNetwork.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Raylib-cs" Version="7.0.2" />
+    </ItemGroup>
+
 </Project>

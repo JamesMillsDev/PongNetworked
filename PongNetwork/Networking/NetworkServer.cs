@@ -8,7 +8,7 @@ namespace Pong.Networking
 	{
 		private readonly List<Socket> connections = [];
 
-		public NetworkServer() : base(Dns.GetHostName())
+		public NetworkServer(string host, int port = 25565) : base(host, port)
 		{
 			_ = Task.Run(async () =>
 			{
@@ -64,6 +64,8 @@ namespace Pong.Networking
 			{
 				Task<Socket> clientSocket = this.socket!.AcceptAsync();
 				await clientSocket;
+				
+				Console.WriteLine("Client: {0} connected", clientSocket.Result.RemoteEndPoint);
 
 				lock (this.connections)
 				{

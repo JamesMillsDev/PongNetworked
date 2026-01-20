@@ -17,10 +17,12 @@ namespace Pong.Networking
 		public static Network? Instance { get; private set; }
 
 		/// <summary> Creates and initializes a new network server instance. </summary>
-		public static void CreateServer() => Instance = new NetworkServer();
+		public static void CreateServer(string endpoint = "localhost", int port = 25565) =>
+			Instance = new NetworkServer(endpoint, port);
 
 		/// <summary> Creates and initializes a new network client instance. </summary>
-		public static void CreateClient(string endpoint, int port = 25565) => Instance = new NetworkClient(endpoint, port);
+		public static void CreateClient(string endpoint, int port = 25565) =>
+			Instance = new NetworkClient(endpoint, port);
 
 		/// <summary>
 		/// Parses a packet buffer to extract the packet ID and payload data.
@@ -82,6 +84,11 @@ namespace Pong.Networking
 		/// <exception cref="Exception">Thrown when the client disconnects during the read operation.</exception>
 		protected static async Task<Tuple<string, byte[]>> ReadPacket(Socket target)
 		{
+			if (target.Available == 0)
+			{
+				return new Tuple<string, byte[]>("NULL", []);
+			}
+			
 			// Stage 1: Read the 4-byte length prefix
 			// This tells us how many bytes to expect in the packet body
 			byte[] lengthBuffer = new byte[sizeof(int)];
@@ -174,13 +181,13 @@ namespace Pong.Networking
 
 		/// <summary> The IP address resolved from the hostname provided in the constructor. </summary>
 		protected readonly IPAddress ipAddr;
-		
+
 		/// <summary> The local endpoint combining the IP address and port number. </summary>
 		protected readonly IPEndPoint localEndPoint;
 
 		/// <summary> The rate at which the <see cref="Poll"/> function will run. </summary>
 		protected readonly int pollRate;
-		
+
 		/// <summary>
 		/// The list of valid packets that can be sent / received on the network.
 		/// </summary>
@@ -239,7 +246,7 @@ namespace Pong.Networking
 		/// <param name="type">The type of the packet.</param>
 		/// <returns>Whether the packet was successfully added.</returns>
 		public bool RegisterPacket(string id, Type type) => this.registeredPackets.TryAdd(id, type);
-		
+
 		/// <summary>
 		/// Attempts to create and get a packet for the passed id.
 		/// </summary>
@@ -248,6 +255,12 @@ namespace Pong.Networking
 		/// <returns>True if a packet was successfully created, false if it wasn't.</returns>
 		protected bool TryMakePacketFor(string id, out Packet? packet)
 		{
+			if (id == "NULL")
+			{
+				packet = null;
+				return false;
+			}
+			
 			// Attempt to get the packet type from the included dictionary
 			if (!this.registeredPackets.TryGetValue(id, out Type? type))
 			{
@@ -255,7 +268,7 @@ namespace Pong.Networking
 				packet = null;
 				return false;
 			}
-			
+
 			// Create and return the packet
 			packet = (Packet)Activator.CreateInstance(type, id)!;
 			return true;

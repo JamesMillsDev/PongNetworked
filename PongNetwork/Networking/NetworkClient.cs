@@ -80,7 +80,7 @@ namespace Pong.Networking
 			await Tasks.While(() => this.socket == null);
 
 			Task connectionTask = this.socket!.ConnectAsync(this.localEndPoint);
-			Task completedTask = await Task.WhenAny(connectionTask, Task.Delay(100));
+			Task completedTask = await Task.WhenAny(connectionTask, Task.Delay(5000));
 			
 			return completedTask == connectionTask;
 		}

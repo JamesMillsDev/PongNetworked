@@ -1,24 +1,36 @@
-﻿using Pong.Networking;
+﻿using Pong.Gameplay;
+using Pong.Networking;
 
 namespace Pong
 {
 	public static class Program
 	{
-		private static void Main(string[] args)
+		private static async Task Main(string[] args)
 		{
 			bool isServer = args[0] == "server";
-			_ = Task.Run(async () =>
+			Task networkTask = Task.Run(async () => await NetworkTaskFnc());
+
+			if (!isServer)
+			{
+				Game game = new Game();
+				game.Run();
+			}
+
+			await networkTask;
+
+			return;
+
+			async Task NetworkTaskFnc()
 			{
 				try
 				{
-					await NetworkLoop(isServer, args[1]);
+					await NetworkLoop(isServer, !isServer ? args[1] : "");
 				}
 				catch (Exception e)
 				{
 					Console.WriteLine(e);
-					throw;
 				}
-			});
+			}
 		}
 
 		private static async Task NetworkLoop(bool isServer, string endpoint)
@@ -36,7 +48,9 @@ namespace Pong
 			{
 				throw new NullReferenceException("Network instance is null");
 			}
-				
+
+			Network.Instance.Open();
+
 			try
 			{
 				while (true)
