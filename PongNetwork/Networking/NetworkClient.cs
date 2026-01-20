@@ -7,7 +7,7 @@ namespace Pong.Networking
 	{
 		private bool connected;
 
-		public override async Task Poll()
+		protected override async Task Poll()
 		{
 			if (!this.connected)
 			{
@@ -36,7 +36,7 @@ namespace Pong.Networking
 			await Task.Delay(this.pollRate);
 		}
 
-		public override void Open(int backlog = 10)
+		protected override void Open(int backlog = 10)
 		{
 			try
 			{

@@ -302,21 +302,6 @@ namespace Pong.Networking
 		}
 
 		/// <summary>
-		/// Polls the network for incoming data and processes packets.
-		/// Must be implemented by derived classes (NetworkServer and NetworkClient).
-		/// </summary>
-		/// <returns>A task representing the asynchronous poll operation.</returns>
-		public abstract Task Poll();
-
-		/// <summary>
-		/// Opens the socket and prepares it for network communication.
-		/// For servers: binds to the local endpoint and starts listening.
-		/// For clients: creates the socket and initiates connection to the server.
-		/// </summary>
-		/// <param name="backlog">The maximum length of the pending connections queue (server only). Defaults to 10.</param>
-		public abstract void Open(int backlog = 10);
-
-		/// <summary>
 		/// Sends a packet through this network instance's socket.
 		/// No-op if the socket is not initialized.
 		/// </summary>
@@ -332,10 +317,33 @@ namespace Pong.Networking
 		}
 
 		/// <summary>
+		/// Registers a packet type so it can be instantiated when received over the network.
+		/// </summary>
+		/// <param name="id">The unique ID for the packet. Must match <see cref="Packet.ID"/>.</param>
+		/// <param name="type">The Type of the packet class.</param>
+		/// <returns>True if the packet was successfully registered, false if a packet with this ID already exists.</returns>
+		public bool RegisterPacket(string id, Type type) => this.registeredPackets.TryAdd(id, type);
+
+		/// <summary>
+		/// Polls the network for incoming data and processes packets.
+		/// Must be implemented by derived classes (NetworkServer and NetworkClient).
+		/// </summary>
+		/// <returns>A task representing the asynchronous poll operation.</returns>
+		protected abstract Task Poll();
+
+		/// <summary>
+		/// Opens the socket and prepares it for network communication.
+		/// For servers: binds to the local endpoint and starts listening.
+		/// For clients: creates the socket and initiates connection to the server.
+		/// </summary>
+		/// <param name="backlog">The maximum length of the pending connections queue (server only). Defaults to 10.</param>
+		protected abstract void Open(int backlog = 10);
+
+		/// <summary>
 		/// Gracefully shuts down and closes the socket connection.
 		/// </summary>
 		/// <exception cref="InvalidOperationException">Thrown when attempting to close a socket that is not connected.</exception>
-		public virtual void Close()
+		protected virtual void Close()
 		{
 			if (this.socket is not { Connected: true })
 			{
@@ -345,14 +353,6 @@ namespace Pong.Networking
 			this.socket.Shutdown(SocketShutdown.Both);
 			this.socket.Close();
 		}
-
-		/// <summary>
-		/// Registers a packet type so it can be instantiated when received over the network.
-		/// </summary>
-		/// <param name="id">The unique ID for the packet. Must match <see cref="Packet.ID"/>.</param>
-		/// <param name="type">The Type of the packet class.</param>
-		/// <returns>True if the packet was successfully registered, false if a packet with this ID already exists.</returns>
-		public bool RegisterPacket(string id, Type type) => this.registeredPackets.TryAdd(id, type);
 
 		/// <summary>
 		/// Attempts to create a packet instance for the given packet ID.

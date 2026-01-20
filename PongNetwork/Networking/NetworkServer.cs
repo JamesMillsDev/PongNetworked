@@ -46,7 +46,7 @@ namespace Pong.Networking
 			}
 		}
 
-		public override async Task Poll()
+		protected override async Task Poll()
 		{
 			List<Socket> connected = [];
 			lock (this.connections)
@@ -72,14 +72,14 @@ namespace Pong.Networking
 			await Task.Delay(this.pollRate);
 		}
 
-		public override void Open(int backlog = 10)
+		protected override void Open(int backlog = 10)
 		{
 			this.socket = new Socket(this.ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 			this.socket.Bind(this.localEndPoint);
 			this.socket.Listen(backlog);
 		}
 
-		public override void Close()
+		protected override void Close()
 		{
 			lock (this.connections)
 			{
