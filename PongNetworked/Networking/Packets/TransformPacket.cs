@@ -42,7 +42,7 @@ namespace Pong.Networking.Packets
 				return Task.CompletedTask;
 			}
 
-			if (Network.Instance.IsHost)
+			if (Network.Instance.HasAuthority)
 			{
 				((NetworkServer)Network.Instance).BroadcastPacket(
 					new TransformPacket(this.actorName, this.position, this.size)

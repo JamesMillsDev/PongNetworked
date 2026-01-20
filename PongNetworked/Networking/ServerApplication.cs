@@ -3,12 +3,11 @@
 	public class ServerApplication : Application
 	{
 		private bool shouldClose;
-		
+
 		protected override bool ShouldClose() => shouldClose;
 
 		protected override void Initialise(Network network)
 		{
-			this.IsClosing = false;
 			this.shouldClose = false;
 		}
 
@@ -19,13 +18,12 @@
 			{
 				return;
 			}
-			
+
 			shouldClose = line == "close";
 		}
 
 		protected override void Shutdown(Network network)
 		{
-			IsClosing = true;
 		}
 	}
 }
