@@ -282,7 +282,7 @@ namespace Pong.Networking
 			}
 
 			// Create and return the packet
-			packet = (Packet)Activator.CreateInstance(type, id)!;
+			packet = (Packet)Activator.CreateInstance(type)!;
 			return true;
 		}
 	}

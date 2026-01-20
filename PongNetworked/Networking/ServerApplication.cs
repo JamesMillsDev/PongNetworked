@@ -8,6 +8,8 @@
 
 		protected override void Initialise(Network network)
 		{
+			this.IsClosing = false;
+			this.shouldClose = false;
 		}
 
 		protected override void Tick(Network network)
@@ -19,14 +21,11 @@
 			}
 			
 			shouldClose = line == "close";
-			if (this.shouldClose)
-			{
-				IsClosing = true;
-			}
 		}
 
 		protected override void Shutdown(Network network)
 		{
+			IsClosing = true;
 		}
 	}
 }

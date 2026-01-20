@@ -1,12 +1,22 @@
-﻿using Pong.Networking;
+﻿using System.Numerics;
+using Pong.Gameplay;
+using Pong.Networking;
+using Pong.Networking.Packets;
+using Raylib_cs;
 
 namespace Pong
 {
 	public abstract class Application
 	{
+		public static readonly List<Actor?> actors = new()
+		{
+			new Paddle("player1", new Vector2(10, 10), Color.Red),
+			new Paddle("player2", new Vector2(765, 10), Color.Blue)
+		};
+		
 		private static void RegisterPackets(Network network)
 		{
-			network.RegisterPacket("message", typeof(MessagePacket));
+			network.RegisterPacket("transform", typeof(TransformPacket));
 		}
 		
 		public bool IsClosing { get; protected set; }

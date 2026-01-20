@@ -1,7 +1,8 @@
-﻿using Pong.Networking;
+﻿using Pong.Gameplay;
+using Pong.Networking;
 using Raylib_cs;
 
-namespace Pong.Gameplay
+namespace Pong.Client
 {
 	public class ClientApplication : Application
 	{
@@ -14,13 +15,18 @@ namespace Pong.Gameplay
 
 		protected override void Tick(Network network)
 		{
-			if (Raylib.IsKeyPressed(KeyboardKey.Space))
+			foreach (Actor? actor in actors)
 			{
-				network.SendPacket(new MessagePacket("Banana"));
+				actor?.Tick(Raylib.GetFrameTime());
 			}
-
+			
 			Raylib.BeginDrawing();
 			Raylib.ClearBackground(Color.RayWhite);
+
+			foreach (Actor? actor in actors)
+			{
+				actor?.Render();
+			}
 
 			Raylib.EndDrawing();
 		}

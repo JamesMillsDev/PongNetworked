@@ -1,4 +1,5 @@
-﻿using Pong.Gameplay;
+﻿using Pong.Client;
+using Pong.Gameplay;
 using Pong.Networking;
 
 namespace Pong
