@@ -60,6 +60,11 @@ namespace Pong.Networking.Packets
 				return BitConverter.GetBytes((ulong)data);
 			}
 
+			if (type == typeof(byte))
+			{
+				return [(byte)data];
+			}
+
 			if (type == typeof(string))
 			{
 				byte[] bytes = Encoding.UTF8.GetBytes((string)data);
@@ -97,7 +102,7 @@ namespace Pong.Networking.Packets
 		}
 
 		public byte[] GetBytes() => this.stream.ToArray();
-		
+
 		public void Dispose()
 		{
 			this.stream.Dispose();

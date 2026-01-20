@@ -173,7 +173,7 @@ namespace Pong.Networking
 			target.Send(data);
 		}
 		
-		public bool IsHost { get; protected set; } = false;
+		public bool HasAuthority { get; protected init; }
 
 		/// <summary>
 		/// The underlying socket used for network communication.
@@ -242,7 +242,7 @@ namespace Pong.Networking
 		/// <exception cref="InvalidOperationException">Thrown when attempting to close a socket that is not connected.</exception>
 		public virtual void Close()
 		{
-			if (this.socket == null)
+			if (this.socket is not { Connected: true })
 			{
 				throw new InvalidOperationException("Socket not connected");
 			}

@@ -55,6 +55,13 @@ namespace Pong.Networking.Packets
 				: throw new Exception("Stream is not readable");
 		}
 
+		public byte ReadByte()
+		{
+			return this.stream.CanRead
+				? ReadBytes(sizeof(byte))[0]
+				: throw new Exception("Stream is not readable");
+		}
+
 		public ushort ReadUInt16()
 		{
 			return this.stream.CanRead

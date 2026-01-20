@@ -3,15 +3,25 @@ using Pong.Networking.Packets;
 
 namespace Pong.Networking
 {
+	public delegate void ClientConnectionDelegate(byte id);
+
+	// TODO: Work out client's disconnecting
 	public class NetworkServer : Network
 	{
+		private static byte nextId;
+		
+		public event ClientConnectionDelegate? OnClientConnected;
+		public event ClientConnectionDelegate? OnClientDisconnected;
+
 		private readonly List<Socket> connections = [];
-		private bool isClosing = false;
+		private bool isClosing;
+
+		private readonly Queue<byte> returnedIds = [];
 
 		public NetworkServer(string host, int port = 25565) : base(host, port)
 		{
-			IsHost = true;
-			
+			this.HasAuthority = true;
+
 			_ = Task.Run(async () =>
 			{
 				try
@@ -78,7 +88,7 @@ namespace Pong.Networking
 					connection.Shutdown(SocketShutdown.Both);
 					connection.Close();
 				}
-				
+
 				this.connections.Clear();
 			}
 
@@ -88,7 +98,7 @@ namespace Pong.Networking
 		private async Task AwaitConnections()
 		{
 			await Tasks.While(() => this.socket == null);
-			
+
 			while (!this.isClosing)
 			{
 				Task<Socket> clientSocket = this.socket!.AcceptAsync();
@@ -98,13 +108,19 @@ namespace Pong.Networking
 				{
 					continue;
 				}
-				
-				Console.WriteLine("Client: {0} connected", clientSocket.Result.RemoteEndPoint);
+
+				if (!this.returnedIds.TryDequeue(out byte id))
+				{
+					id = nextId++;
+				}
 
 				lock (this.connections)
 				{
 					this.connections.Add(clientSocket.Result);
 				}
+				
+				OnClientConnected?.Invoke(id);
+				Console.WriteLine("Client: {0} connected - Assigning id: {1}", clientSocket.Result.RemoteEndPoint, id);
 			}
 		}
 	}
