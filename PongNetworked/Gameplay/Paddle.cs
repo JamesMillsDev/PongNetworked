@@ -19,7 +19,18 @@ namespace Pong.Gameplay
 
 		public override void Tick(float dt)
 		{
-			
+			if (Raylib.IsKeyPressed(KeyboardKey.Up) && this.Name == "player1")
+			{
+				Network.Instance?.SendPacket(
+					new TransformPacket(
+						this.Name,
+						this.Transform with
+						{
+							Position = this.Transform.Position + new  Vector2(0, this.Transform.Size.Y)
+						}
+					)
+				);
+			}
 		}
 
 		public override void Render()

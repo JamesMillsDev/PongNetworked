@@ -4,7 +4,7 @@ using Pong.Networking.Packets;
 
 namespace Pong.Gameplay
 {
-	public class Transform : IPacketSerializable
+	public record Transform : IPacketSerializable
 	{
 		public Vector2 Position { get; set; }
 		public Vector2 Size { get; set; }
