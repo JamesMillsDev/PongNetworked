@@ -40,13 +40,13 @@ namespace Pong.Networking.Packets
 				);
 			}
 			
-			Actor? actor = Application.actors.FirstOrDefault(a => a?.Name == this.actorName);
+			/*Actor? actor = Application.actors.FirstOrDefault(a => a?.Name == this.actorName);
 			if (actor == null)
 			{
 				return Task.CompletedTask;
 			}
 
-			actor.Transform = this.transform;
+			actor.Transform = this.transform;*/
 
 			return Task.CompletedTask;
 		}

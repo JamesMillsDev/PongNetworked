@@ -16,60 +16,23 @@ namespace Pong.Networking
 		/// </summary>
 		public static Network? Instance { get; private set; }
 
-		/// <summary> Creates and initializes a new network server instance. </summary>
-		public static void CreateServer(string endpoint = "localhost", int port = 25565) =>
-			Instance = new NetworkServer(endpoint, port);
-
-		/// <summary> Creates and initializes a new network client instance. </summary>
-		public static void CreateClient(string endpoint, int port = 25565) =>
-			Instance = new NetworkClient(endpoint, port);
-
 		/// <summary>
-		/// Parses a packet buffer to extract the packet ID and payload data.
-		/// Expected buffer format: [idLength (4 bytes)][id (variable)][payload (remaining)]
+		/// Initializes and runs the network loop based on command-line arguments.
+		/// Creates either a server or client instance and continuously polls for network events.
 		/// </summary>
-		/// <param name="buffer">The buffer containing the packet data.</param>
-		/// <param name="id">Output parameter that receives the packet ID string.</param>
-		/// <param name="payload">Output parameter that receives the packet payload bytes.</param>
-		/// <exception cref="InvalidOperationException">Thrown when the buffer stream cannot be read.</exception>
-		/// <exception cref="ArgumentOutOfRangeException">Thrown when the ID length is negative.</exception>
-		private static void ReadPacketHeader(byte[] buffer, out string id, out byte[] payload)
+		/// <param name="args">Command-line arguments. First argument should be "server" or anything else for client.
+		/// For client mode, second argument should be the server endpoint address.</param>
+		/// <param name="app">The application instance used to check when to stop the network loop.</param>
+		public static async Task RunNetworkLoop(string[] args, ApplicationBase app)
 		{
-			using (MemoryStream memoryStream = new(buffer))
+			try
 			{
-				if (!memoryStream.CanRead)
-				{
-					throw new InvalidOperationException("Cannot read packet header");
-				}
-
-				// Read the length of the packet ID string
-				byte[] idLengthBytes = new byte[sizeof(int)];
-				memoryStream.ReadExactly(idLengthBytes);
-
-				int idLength = BitConverter.ToInt32(idLengthBytes);
-				ArgumentOutOfRangeException.ThrowIfNegative(idLength);
-
-				// Handle empty ID case (ID length is 0)
-				if (idLength == 0)
-				{
-					id = string.Empty;
-					// Everything remaining in buffer is payload
-					int payloadSize = (int)(memoryStream.Length - memoryStream.Position);
-					payload = new byte[payloadSize];
-					memoryStream.ReadExactly(payload);
-
-					return;
-				}
-
-				// Read the packet ID string
-				byte[] idBytes = new byte[idLength];
-				memoryStream.ReadExactly(idBytes);
-				id = Encoding.UTF8.GetString(idBytes);
-
-				// Read the remaining bytes as payload
-				int remainingPayloadSize = (int)(memoryStream.Length - memoryStream.Position);
-				payload = new byte[remainingPayloadSize];
-				memoryStream.ReadExactly(payload);
+				bool isServer = args[0] == "server";
+				await InitializeAndPoll(isServer, !isServer ? args[1] : "", app);
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
 			}
 		}
 
@@ -79,11 +42,12 @@ namespace Pong.Networking
 		/// Each receive operation has a 1-second timeout to prevent indefinite blocking.
 		/// </summary>
 		/// <param name="target">The socket to read from.</param>
-		/// <returns>A tuple containing the packet ID and payload data.</returns>
+		/// <returns>A tuple containing the packet ID and payload data. Returns ("NULL", empty array) if no data is available.</returns>
 		/// <exception cref="TimeoutException">Thrown when the packet is not received within the timeout period (1 second per read operation).</exception>
 		/// <exception cref="Exception">Thrown when the client disconnects during the read operation.</exception>
 		protected static async Task<Tuple<string, byte[]>> ReadPacket(Socket target)
 		{
+			// Check if any data is available before attempting to read
 			if (target.Available == 0)
 			{
 				return new Tuple<string, byte[]>("NULL", []);
@@ -172,7 +136,125 @@ namespace Pong.Networking
 
 			target.Send(data);
 		}
+
+		/// <summary>
+		/// Creates and initializes a new network server instance.
+		/// </summary>
+		/// <param name="endpoint">The hostname or IP address to bind to. Defaults to "localhost".</param>
+		/// <param name="port">The port number to listen on. Defaults to 25565.</param>
+		private static void CreateServer(string endpoint = "localhost", int port = 25565) =>
+			Instance = new NetworkServer(endpoint, port);
+
+		/// <summary>
+		/// Creates and initializes a new network client instance.
+		/// </summary>
+		/// <param name="endpoint">The hostname or IP address of the server to connect to.</param>
+		/// <param name="port">The port number to connect to. Defaults to 25565.</param>
+		private static void CreateClient(string endpoint, int port = 25565) =>
+			Instance = new NetworkClient(endpoint, port);
 		
+		/// <summary>
+		/// Parses a packet buffer to extract the packet ID and payload data.
+		/// Expected buffer format: [idLength (4 bytes)][id (variable)][payload (remaining)]
+		/// </summary>
+		/// <param name="buffer">The buffer containing the packet data.</param>
+		/// <param name="id">Output parameter that receives the packet ID string.</param>
+		/// <param name="payload">Output parameter that receives the packet payload bytes.</param>
+		/// <exception cref="InvalidOperationException">Thrown when the buffer stream cannot be read.</exception>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when the ID length is negative.</exception>
+		private static void ReadPacketHeader(byte[] buffer, out string id, out byte[] payload)
+		{
+			using (MemoryStream memoryStream = new(buffer))
+			{
+				if (!memoryStream.CanRead)
+				{
+					throw new InvalidOperationException("Cannot read packet header");
+				}
+
+				// Read the length of the packet ID string
+				byte[] idLengthBytes = new byte[sizeof(int)];
+				memoryStream.ReadExactly(idLengthBytes);
+
+				int idLength = BitConverter.ToInt32(idLengthBytes);
+				ArgumentOutOfRangeException.ThrowIfNegative(idLength);
+
+				// Handle empty ID case (ID length is 0)
+				if (idLength == 0)
+				{
+					id = string.Empty;
+					// Everything remaining in buffer is payload
+					int payloadSize = (int)(memoryStream.Length - memoryStream.Position);
+					payload = new byte[payloadSize];
+					memoryStream.ReadExactly(payload);
+
+					return;
+				}
+
+				// Read the packet ID string
+				byte[] idBytes = new byte[idLength];
+				memoryStream.ReadExactly(idBytes);
+				id = Encoding.UTF8.GetString(idBytes);
+
+				// Read the remaining bytes as payload
+				int remainingPayloadSize = (int)(memoryStream.Length - memoryStream.Position);
+				payload = new byte[remainingPayloadSize];
+				memoryStream.ReadExactly(payload);
+			}
+		}
+		
+		/// <summary>
+		/// Internal method that initializes the network (server or client) and runs the polling loop.
+		/// Continues polling until the application signals it is closing.
+		/// </summary>
+		/// <param name="isServer">True to create a server instance, false to create a client instance.</param>
+		/// <param name="endpoint">The server endpoint address (only used for client mode).</param>
+		/// <param name="app">The application instance to monitor for shutdown.</param>
+		private static async Task InitializeAndPoll(bool isServer, string endpoint, ApplicationBase app)
+		{
+			if (isServer)
+			{
+				CreateServer();
+			}
+			else
+			{
+				CreateClient(endpoint);
+			}
+
+			if (Instance == null)
+			{
+				throw new NullReferenceException("Network instance is null");
+			}
+
+			Instance.Open();
+			
+			try
+			{
+				// Continue polling until the application signals it's closing
+				while (!app.IsClosing)
+				{
+					try
+					{
+						await Instance.Poll();
+					}
+					catch (Exception e)
+					{
+						Console.WriteLine(e);
+						throw;
+					}
+				}
+
+				Instance.Close();
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+			}
+		}
+		
+		/// <summary>
+		/// Gets whether this network instance has authority (true for server, false for client).
+		/// The authoritative instance is responsible for game state and validation.
+		/// </summary>
 		public bool HasAuthority { get; protected init; }
 
 		/// <summary>
@@ -181,17 +263,24 @@ namespace Pong.Networking
 		/// </summary>
 		protected Socket? socket;
 
-		/// <summary> The IP address resolved from the hostname provided in the constructor. </summary>
+		/// <summary>
+		/// The IP address resolved from the hostname provided in the constructor.
+		/// </summary>
 		protected readonly IPAddress ipAddr;
 
-		/// <summary> The local endpoint combining the IP address and port number. </summary>
+		/// <summary>
+		/// The local endpoint combining the IP address and port number.
+		/// </summary>
 		protected readonly IPEndPoint localEndPoint;
 
-		/// <summary> The rate at which the <see cref="Poll"/> function will run. </summary>
+		/// <summary>
+		/// The rate (in milliseconds) at which the <see cref="Poll"/> function will run.
+		/// </summary>
 		protected readonly int pollRate;
 
 		/// <summary>
-		/// The list of valid packets that can be sent / received on the network.
+		/// Dictionary mapping packet IDs to their corresponding packet types.
+		/// Used to instantiate the correct packet class when receiving data.
 		/// </summary>
 		private readonly Dictionary<string, Type> registeredPackets = new();
 
@@ -200,8 +289,8 @@ namespace Pong.Networking
 		/// Resolves the hostname to an IP address and creates an endpoint.
 		/// </summary>
 		/// <param name="hostName">The hostname to resolve (e.g., "localhost" or a domain name).</param>
-		/// <param name="port">The port number to use for the connection. Defaults to 25565 (Minecraft's default port).</param>
-		/// <param name = "pollRate">How often the network should poll for changes. See: <see cref="Poll"/></param>
+		/// <param name="port">The port number to use for the connection. Defaults to 25565.</param>
+		/// <param name="pollRate">How often (in milliseconds) the network should poll for changes. Defaults to 20ms.</param>
 		protected Network(string hostName, int port = 25565, int pollRate = 20)
 		{
 			IPHostEntry ipHost = Dns.GetHostEntry(hostName);
@@ -220,12 +309,18 @@ namespace Pong.Networking
 		public abstract Task Poll();
 
 		/// <summary>
-		/// Opens the socket, binds it to the local endpoint, and starts listening for connections.
-		/// This is typically called by server implementations.
+		/// Opens the socket and prepares it for network communication.
+		/// For servers: binds to the local endpoint and starts listening.
+		/// For clients: creates the socket and initiates connection to the server.
 		/// </summary>
-		/// <param name="backlog">The maximum length of the pending connections queue. Defaults to 10.</param>
+		/// <param name="backlog">The maximum length of the pending connections queue (server only). Defaults to 10.</param>
 		public abstract void Open(int backlog = 10);
 
+		/// <summary>
+		/// Sends a packet through this network instance's socket.
+		/// No-op if the socket is not initialized.
+		/// </summary>
+		/// <param name="packet">The packet to serialize and send.</param>
 		public void SendPacket(Packet packet)
 		{
 			if (this.socket == null)
@@ -252,28 +347,29 @@ namespace Pong.Networking
 		}
 
 		/// <summary>
-		/// Registers a packet type to the internal tracker.
+		/// Registers a packet type so it can be instantiated when received over the network.
 		/// </summary>
-		/// <param name="id">The ID for the packet. Must match the variable <see cref="Packet.ID"/>.</param>
-		/// <param name="type">The type of the packet.</param>
-		/// <returns>Whether the packet was successfully added.</returns>
+		/// <param name="id">The unique ID for the packet. Must match <see cref="Packet.ID"/>.</param>
+		/// <param name="type">The Type of the packet class.</param>
+		/// <returns>True if the packet was successfully registered, false if a packet with this ID already exists.</returns>
 		public bool RegisterPacket(string id, Type type) => this.registeredPackets.TryAdd(id, type);
 
 		/// <summary>
-		/// Attempts to create and get a packet for the passed id.
+		/// Attempts to create a packet instance for the given packet ID.
 		/// </summary>
-		/// <param name="id">The ID for the packet we are attempting to make</param>
-		/// <param name="packet">The created packet. Will be null if <see cref="id"/> is an invalid id.</param>
-		/// <returns>True if a packet was successfully created, false if it wasn't.</returns>
+		/// <param name="id">The ID of the packet to create.</param>
+		/// <param name="packet">Output parameter that receives the created packet instance, or null if creation failed.</param>
+		/// <returns>True if a packet was successfully created, false if the ID is invalid or not registered.</returns>
 		protected bool TryMakePacketFor(string id, out Packet? packet)
 		{
+			// Handle special "NULL" ID returned when no data is available
 			if (id == "NULL")
 			{
 				packet = null;
 				return false;
 			}
 			
-			// Attempt to get the packet type from the included dictionary
+			// Attempt to get the packet type from the registered packets dictionary
 			if (!this.registeredPackets.TryGetValue(id, out Type? type))
 			{
 				Console.WriteLine($"No packet with id {id} found.");
@@ -281,7 +377,7 @@ namespace Pong.Networking
 				return false;
 			}
 
-			// Create and return the packet
+			// Create and return the packet instance
 			packet = (Packet)Activator.CreateInstance(type)!;
 			return true;
 		}

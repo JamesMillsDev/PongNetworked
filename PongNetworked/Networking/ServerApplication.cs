@@ -1,8 +1,13 @@
 ﻿namespace Pong.Networking
 {
-	public class ServerApplication : Application
+	public class ServerApplication : ApplicationBase
 	{
 		private bool shouldClose;
+
+		protected override void RegisterPackets(Network network)
+		{
+			Packets.Packets.Register(network);
+		}
 
 		protected override bool ShouldClose() => shouldClose;
 
