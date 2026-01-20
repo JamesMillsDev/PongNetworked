@@ -1,4 +1,4 @@
-﻿namespace Pong
+﻿namespace Pong.Utility
 {
 	public static class Tasks
 	{

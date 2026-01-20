@@ -1,4 +1,4 @@
-﻿namespace Pong
+﻿namespace Pong.Utility.Extensions
 {
 	public static class MemoryStreamExtensions
 	{

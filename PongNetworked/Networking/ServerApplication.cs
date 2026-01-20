@@ -4,17 +4,11 @@
 	{
 		private bool shouldClose;
 
-		protected override void RegisterPackets(Network network)
-		{
-			Packets.Packets.Register(network);
-		}
+		protected override void RegisterPackets(Network network) => Packets.Packets.Register(network);
 
 		protected override bool ShouldClose() => shouldClose;
 
-		protected override void Initialise(Network network)
-		{
-			this.shouldClose = false;
-		}
+		protected override void Initialise(Network network) => this.shouldClose = false;
 
 		protected override void Tick(Network network)
 		{

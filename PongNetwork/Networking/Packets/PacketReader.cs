@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Pong.Utility.Extensions;
 
 namespace Pong.Networking.Packets
 {

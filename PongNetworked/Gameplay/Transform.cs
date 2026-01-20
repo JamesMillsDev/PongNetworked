@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using System.Runtime.InteropServices;
 using Pong.Networking.Packets;
+using Pong.Utility.Extensions;
 
 namespace Pong.Gameplay
 {
