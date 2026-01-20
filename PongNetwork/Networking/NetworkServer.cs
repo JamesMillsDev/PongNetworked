@@ -71,7 +71,16 @@ namespace Pong.Networking
 
 		public override void Close()
 		{
-			base.Close();
+			lock (this.connections)
+			{
+				foreach (Socket connection in this.connections)
+				{
+					connection.Shutdown(SocketShutdown.Both);
+					connection.Close();
+				}
+				
+				this.connections.Clear();
+			}
 
 			this.isClosing = true;
 		}
@@ -83,7 +92,12 @@ namespace Pong.Networking
 			while (!this.isClosing)
 			{
 				Task<Socket> clientSocket = this.socket!.AcceptAsync();
-				await clientSocket;
+				await Task.WhenAny(clientSocket, Tasks.While(() => !this.isClosing));
+
+				if (!clientSocket.IsCompleted)
+				{
+					continue;
+				}
 				
 				Console.WriteLine("Client: {0} connected", clientSocket.Result.RemoteEndPoint);
 

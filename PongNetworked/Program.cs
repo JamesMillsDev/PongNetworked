@@ -8,32 +8,26 @@ namespace Pong
 		private static async Task Main(string[] args)
 		{
 			bool isServer = args[0] == "server";
+			Application app = isServer ? new ServerApplication() : new ClientApplication();
+
 			Task networkTask = Task.Run(async () =>
 			{
 				try
 				{
-					await NetworkLoop(isServer, !isServer ? args[1] : "");
+					await NetworkLoop(isServer, !isServer ? args[1] : "", app);
 				}
 				catch (Exception e)
 				{
 					Console.WriteLine(e);
 				}
 			});
-
-			await Tasks.While(() => Network.Instance == null);
-
-			Network.Instance!.RegisterPacket("message", typeof(MessagePacket));
 			
-			if (!isServer)
-			{
-				Game game = new();
-				game.Run();
-			}
+			Task runTask = Task.Run(async () => await app.Run());
 
-			await networkTask;
+			await Task.WhenAll(runTask, networkTask);
 		}
 
-		private static async Task NetworkLoop(bool isServer, string endpoint)
+		private static async Task NetworkLoop(bool isServer, string endpoint, Application app)
 		{
 			if (isServer)
 			{
@@ -53,7 +47,7 @@ namespace Pong
 
 			try
 			{
-				while (true)
+				while (!app.IsClosing)
 				{
 					try
 					{
@@ -65,7 +59,7 @@ namespace Pong
 						throw;
 					}
 				}
-				
+
 				Network.Instance.Close();
 			}
 			catch (Exception e)
