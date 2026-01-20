@@ -1,37 +1,28 @@
-﻿using System.Numerics;
-using Pong.Gameplay;
+﻿using Pong.Gameplay;
 
 namespace Pong.Networking.Packets
 {
 	public class TransformPacket() : Packet("transform")
 	{
 		private string actorName = "";
-		private Vector2 position = Vector2.Zero;
-		private Vector2 size = Vector2.Zero;
+		private Transform transform = new();
 
-		public TransformPacket(string actorName, Vector2 position, Vector2 size) : this()
+		public TransformPacket(string actorName, Transform transform) : this()
 		{
 			this.actorName = actorName;
-			this.position = position;
-			this.size = size;
+			this.transform = transform;
 		}
 
 		public override void Serialize(PacketWriter writer)
 		{
 			writer.Write(this.actorName);
-			writer.Write(this.position.X);
-			writer.Write(this.position.Y);
-			writer.Write(this.size.X);
-			writer.Write(this.size.Y);
+			writer.Write(this.transform);
 		}
 
 		public override void Deserialize(PacketReader reader)
 		{
 			this.actorName = reader.ReadString();
-			this.position.X = reader.ReadFloat();
-			this.position.Y = reader.ReadFloat();
-			this.size.X = reader.ReadFloat();
-			this.size.Y = reader.ReadFloat();
+			this.transform = reader.ReadPacketSerializable<Transform>();
 		}
 
 		public override Task Process()
@@ -45,7 +36,7 @@ namespace Pong.Networking.Packets
 			if (Network.Instance.HasAuthority)
 			{
 				((NetworkServer)Network.Instance).BroadcastPacket(
-					new TransformPacket(this.actorName, this.position, this.size)
+					new TransformPacket(this.actorName, this.transform)
 				);
 			}
 			
@@ -55,8 +46,7 @@ namespace Pong.Networking.Packets
 				return Task.CompletedTask;
 			}
 
-			actor.Transform.Position = this.position;
-			actor.Transform.Size = this.size;
+			actor.Transform = this.transform;
 
 			return Task.CompletedTask;
 		}
