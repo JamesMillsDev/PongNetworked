@@ -1,9 +1,8 @@
 ﻿using DaisNET.Networking;
-using DaisNET.Networking.Networking;
 
 namespace Pong.Networking
 {
-	public class ServerApplication : ApplicationBase
+	public class ServerNetworkApplication() : NetworkApplicationBase(true)
 	{
 		private bool shouldClose;
 

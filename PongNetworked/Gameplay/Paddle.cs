@@ -1,5 +1,5 @@
 ﻿using System.Numerics;
-using DaisNET.Networking.Networking;
+using DaisNET.Networking;
 using Pong.Networking.Packets;
 using Raylib_cs;
 

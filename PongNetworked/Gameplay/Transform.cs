@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 using System.Runtime.InteropServices;
-using DaisNET.Networking.Networking.Packets;
-using DaisNET.Networking.Utility.Extensions;
+using DaisNET.Networking.Packets;
+using DaisNET.Utility.Extensions;
 
 namespace Pong.Gameplay
 {

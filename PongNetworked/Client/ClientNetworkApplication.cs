@@ -1,11 +1,10 @@
 ﻿using DaisNET.Networking;
-using DaisNET.Networking.Networking;
 using Pong.Networking.Packets;
 using Raylib_cs;
 
 namespace Pong.Client
 {
-	public class ClientApplication : ApplicationBase
+	public class ClientNetworkApplication() : NetworkApplicationBase(false)
 	{
 		protected override void RegisterPackets(Network network)
 		{

@@ -1,5 +1,5 @@
-﻿using DaisNET.Networking.Networking;
-using DaisNET.Networking.Networking.Packets;
+﻿using DaisNET.Networking;
+using DaisNET.Networking.Packets;
 using Pong.Gameplay;
 
 namespace Pong.Networking.Packets

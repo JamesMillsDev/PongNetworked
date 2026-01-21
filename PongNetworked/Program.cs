@@ -1,5 +1,4 @@
 ﻿using DaisNET.Networking;
-using DaisNET.Networking.Networking;
 using Pong.Client;
 using Pong.Networking;
 
@@ -10,9 +9,9 @@ namespace Pong
 		private static async Task Main(string[] args)
 		{
 			bool isServer = args[0] == "server";
-			ApplicationBase app = isServer ? new ServerApplication() : new ClientApplication();
+			NetworkApplicationBase app = isServer ? new ServerNetworkApplication() : new ClientNetworkApplication();
 
-			Task networkTask = Task.Run(async () => await Network.RunNetworkLoop(args, app));
+			Task networkTask = Task.Run(async () => await Network.RunNetworkLoop(app, app.IsServer ? args[1] : ""));
 			Task runTask = Task.Run(async () => await app.Run());
 
 			await Task.WhenAll(runTask, networkTask);

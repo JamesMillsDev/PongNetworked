@@ -1,4 +1,4 @@
-﻿using DaisNET.Networking.Networking;
+﻿using DaisNET.Networking;
 
 namespace Pong.Networking.Packets
 {
