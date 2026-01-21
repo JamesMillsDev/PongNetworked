@@ -1,0 +1,3 @@
+[submodule "DaisNET.Networking"]
+	path = DaisNET.Networking
+	url = https://JamesMillsDev@github.com/JamesMillsDev/DaisNET.Networking.git
