@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PongNetworked", "PongNetworked\PongNetworked.csproj", "{106AF88F-18B7-46AC-83B3-C5B7DEBE8108}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaisNET.Networking", "PongNetwork\DaisNET.Networking.csproj", "{C1B9AC82-A6C8-47F4-B136-3DE4EEB469C1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaisNET.Networking", "DaisNET.Networking\DaisNET.Networking.csproj", "{C1B9AC82-A6C8-47F4-B136-3DE4EEB469C1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,4 +1,6 @@
-﻿namespace Pong.Networking.Packets
+﻿using DaisNET.Networking.Networking;
+
+namespace Pong.Networking.Packets
 {
 	public static class Packets
 	{
