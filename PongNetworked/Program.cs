@@ -11,7 +11,7 @@ namespace Pong
 			bool isServer = args[0] == "server";
 			NetworkApplicationBase app = isServer ? new ServerNetworkApplication() : new ClientNetworkApplication();
 
-			Task networkTask = Task.Run(async () => await Network.RunNetworkLoop(app, app.IsServer ? args[1] : ""));
+			Task networkTask = Task.Run(async () => await Network.RunNetworkLoop(app, app.IsServer ? "" : args[1]));
 			Task runTask = Task.Run(async () => await app.Run());
 
 			await Task.WhenAll(runTask, networkTask);
