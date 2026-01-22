@@ -7,11 +7,11 @@
         <Nullable>enable</Nullable>
         <AssemblyName>Pong</AssemblyName>
         <RootNamespace>Pong</RootNamespace>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\DaisNET.Networking\DaisNET.Networking.csproj" />
-      <ProjectReference Include="..\PongNetwork\PongNetwork.csproj" />
     </ItemGroup>
 
     <ItemGroup>

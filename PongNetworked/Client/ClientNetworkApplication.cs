@@ -15,6 +15,8 @@ namespace Pong.Client
 
 		protected override void Initialise(Network network)
 		{
+			PongTraceLog.SetupLog();
+			
 			Raylib.InitWindow(800, 600, "Pong");
 		}
 
@@ -36,9 +38,11 @@ namespace Pong.Client
 			Raylib.EndDrawing();
 		}
 
-		protected override void Shutdown(Network network)
+		protected override unsafe void Shutdown(Network network)
 		{
 			Raylib.CloseWindow();
+			
+			Raylib.SetTraceLogCallback(&Logging.LogConsole);
 		}
 	}
 }
