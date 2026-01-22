@@ -6,7 +6,7 @@ namespace Pong.Networking.Packets
 	{
 		public static void Register(Network network)
 		{
-			
+			network.RegisterPacket(TransformPacket.ID_NAME, typeof(TransformPacket));
 		}
 	}
 }
