@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 using System.Runtime.InteropServices;
-using DaisNET.Networking.Packets;
+using DaisNET.Networking.Serialization;
 using DaisNET.Utility.Extensions;
 
 namespace Pong.Gameplay
@@ -13,10 +13,6 @@ namespace Pong.Gameplay
 		public byte[] Serialize()
 		{
 			List<byte> bytes = [];
-			if (bytes == null)
-			{
-				throw new ArgumentNullException(nameof(bytes));
-			}
 
 			bytes.AddRange(BitConverter.GetBytes(Position.X));
 			bytes.AddRange(BitConverter.GetBytes(Position.Y));
