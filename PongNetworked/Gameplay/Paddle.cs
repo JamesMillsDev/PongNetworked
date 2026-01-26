@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using DaisNET.Networking;
+using Pong.Networking;
 using Pong.Networking.Packets;
 using Raylib_cs;
 
@@ -21,7 +22,7 @@ namespace Pong.Gameplay
 		{
 			if (Raylib.IsKeyPressed(KeyboardKey.Up) && this.Name == "player1")
 			{
-				Network.Instance?.SendPacket(
+				Network<PongNetworkPlayer>.Instance?.SendPacket(
 					new TransformPacket(
 						this.Name,
 						this.Transform with
