@@ -1,12 +1,12 @@
 ﻿using System.Numerics;
 using DaisNET.Networking;
+using DaisNET.Networking.Packets.Gameplay;
 using Pong.Networking;
-using Pong.Networking.Packets;
 using Raylib_cs;
 
 namespace Pong.Gameplay
 {
-	public class Paddle : Actor
+	public class Paddle : PongActor
 	{
 		private readonly Color color;
 
@@ -23,7 +23,7 @@ namespace Pong.Gameplay
 			if (Raylib.IsKeyPressed(KeyboardKey.Up) && this.Name == "player1")
 			{
 				Network<PongNetworkPlayer>.Instance?.SendPacket(
-					new TransformPacket(
+					new TransformPacket<PongNetworkPlayer>(
 						this.Name,
 						this.Transform with
 						{

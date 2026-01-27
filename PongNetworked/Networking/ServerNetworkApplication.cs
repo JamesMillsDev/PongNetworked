@@ -6,8 +6,9 @@ namespace Pong.Networking
 	{
 		private bool shouldClose;
 
-		protected override void RegisterPackets(Network<PongNetworkPlayer> network) =>
-			Packets.Packets.Register(network);
+		protected override void RegisterPackets(Network<PongNetworkPlayer> network)
+		{
+		}
 
 		protected override bool ShouldClose() => shouldClose;
 

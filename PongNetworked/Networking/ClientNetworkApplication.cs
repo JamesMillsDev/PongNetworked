@@ -8,7 +8,7 @@ namespace Pong.Networking
 	{
 		protected override void RegisterPackets(Network<PongNetworkPlayer> network)
 		{
-			Packets.Packets.Register(network);
+			
 		}
 
 		protected override bool ShouldClose() => Raylib.WindowShouldClose();
