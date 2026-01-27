@@ -2,19 +2,19 @@
 
 namespace Pong.Networking
 {
-	public class ServerNetworkApplication() : NetworkApplicationBase<PongNetworkPlayer>(true)
+	public class ServerNetworkApplication() : NetworkApplicationBase(true)
 	{
 		private bool shouldClose;
 
-		protected override void RegisterPackets(Network<PongNetworkPlayer> network)
+		protected override void RegisterPackets(Network network)
 		{
 		}
 
 		protected override bool ShouldClose() => shouldClose;
 
-		protected override void Initialise(Network<PongNetworkPlayer> network) => this.shouldClose = false;
+		protected override void Initialise(Network network) => this.shouldClose = false;
 
-		protected override void Tick(Network<PongNetworkPlayer> network)
+		protected override void Tick(Network network)
 		{
 			string? line = Console.ReadLine();
 			if (line == null)
@@ -25,7 +25,7 @@ namespace Pong.Networking
 			shouldClose = line == "close";
 		}
 
-		protected override void Shutdown(Network<PongNetworkPlayer> network)
+		protected override void Shutdown(Network network)
 		{
 		}
 	}

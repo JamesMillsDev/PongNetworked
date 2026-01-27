@@ -4,23 +4,23 @@ using Raylib_cs;
 
 namespace Pong.Networking
 {
-	public class ClientNetworkApplication() : NetworkApplicationBase<PongNetworkPlayer>(false)
+	public class ClientNetworkApplication() : NetworkApplicationBase(false)
 	{
-		protected override void RegisterPackets(Network<PongNetworkPlayer> network)
+		protected override void RegisterPackets(Network network)
 		{
 			
 		}
 
 		protected override bool ShouldClose() => Raylib.WindowShouldClose();
 
-		protected override void Initialise(Network<PongNetworkPlayer> network)
+		protected override void Initialise(Network network)
 		{
 			PongTraceLog.SetupLog();
 
 			Raylib.InitWindow(800, 600, "Pong");
 		}
 
-		protected override void Tick(Network<PongNetworkPlayer> network)
+		protected override void Tick(Network network)
 		{
 			/*foreach (Actor<PongNetworkPlayer> actor in network.Actors)
 			{
@@ -38,7 +38,7 @@ namespace Pong.Networking
 			Raylib.EndDrawing();
 		}
 
-		protected override unsafe void Shutdown(Network<PongNetworkPlayer> network)
+		protected override unsafe void Shutdown(Network network)
 		{
 			Raylib.CloseWindow();
 
