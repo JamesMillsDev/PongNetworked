@@ -22,17 +22,17 @@ namespace Pong.Networking
 
 		protected override void Tick(Network<PongNetworkPlayer> network)
 		{
-			/*foreach (Actor? actor in actors)
+			/*foreach (Actor<PongNetworkPlayer> actor in network.Actors)
 			{
-				actor?.Tick(Raylib.GetFrameTime());
+				actor.Tick(Raylib.GetFrameTime());
 			}*/
 
 			Raylib.BeginDrawing();
 			Raylib.ClearBackground(Color.RayWhite);
 
-			/*foreach (Actor? actor in actors)
+			/*foreach (Actor<PongNetworkPlayer> actor in network.Actors)
 			{
-				actor?.Render();
+				actor.Render();
 			}*/
 
 			Raylib.EndDrawing();

@@ -1,6 +1,4 @@
 ﻿using System.Numerics;
-using DaisNET.Networking;
-using DaisNET.Networking.Packets.Gameplay;
 using Pong.Networking;
 using Raylib_cs;
 
@@ -10,27 +8,27 @@ namespace Pong.Gameplay
 	{
 		private readonly Color color;
 
-		public Paddle(string name, Vector2 initialPosition, Color color) : base(name)
+		public Paddle(string name, Color color, PongNetworkPlayer player) : base(name, player)
 		{
-			this.Transform.Position = initialPosition;
-
 			this.Transform.Size = new Vector2(25, 150);
 			this.color = color;
 		}
 
 		public override void Tick(float dt)
 		{
-			if (Raylib.IsKeyPressed(KeyboardKey.Up) && this.Name == "player1")
+			if (!this.Player.IsLocalPlayer)
 			{
-				Network<PongNetworkPlayer>.Instance?.SendPacket(
-					new TransformPacket<PongNetworkPlayer>(
-						this.Name,
-						this.Transform with
-						{
-							Position = this.Transform.Position + new  Vector2(0, this.Transform.Size.Y)
-						}
-					)
-				);
+				return;
+			}
+			
+			if (Raylib.IsKeyDown(KeyboardKey.W))
+			{
+				this.Transform.Velocity -= Vector2.UnitY * 100 * dt;
+			}
+
+			if (Raylib.IsKeyDown(KeyboardKey.S))
+			{
+				this.Transform.Velocity += Vector2.UnitY * 100 * dt;
 			}
 		}
 
