@@ -8,7 +8,7 @@ namespace Pong.Gameplay
 	{
 		private readonly Color color;
 
-		public Paddle(string name, Color color, PongNetworkPlayer player) : base(name, player)
+		public Paddle(Color color, PongNetworkPlayer player) : base(player)
 		{
 			this.Transform.Size = new Vector2(25, 150);
 			this.color = color;
