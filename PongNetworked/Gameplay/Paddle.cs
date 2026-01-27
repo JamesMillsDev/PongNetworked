@@ -1,14 +1,10 @@
-﻿using System.Numerics;
-using Pong.Networking;
-using Raylib_cs;
-
-namespace Pong.Gameplay
+﻿namespace Pong.Gameplay
 {
-	public class Paddle : PongActor
+	/*public class Paddle : PongActor
 	{
 		private readonly Color color;
 
-		public Paddle(Color color, PongNetworkPlayer player) : base(player)
+		public Paddle(Color color)
 		{
 			this.Transform.Size = new Vector2(25, 150);
 			this.color = color;
@@ -36,5 +32,5 @@ namespace Pong.Gameplay
 		{
 			Raylib.DrawRectangleV(this.Transform.Position, this.Transform.Size, this.color);
 		}
-	}
+	}*/
 }
