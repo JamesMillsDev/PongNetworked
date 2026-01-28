@@ -1,36 +1,35 @@
-﻿namespace Pong.Gameplay
-{
-	/*public class Paddle : PongActor
-	{
-		private readonly Color color;
+﻿using System.Numerics;
+using DaisNET.Networking;
+using DaisNET.Networking.Gameplay;
+using Raylib_cs;
 
-		public Paddle(Color color)
+namespace Pong.Gameplay
+{
+	public class Paddle : Actor
+	{
+		public Color color;
+
+		public Paddle(NetworkPlayer player, Guid id)
+			: base(player, id)
 		{
-			this.Transform.Size = new Vector2(25, 150);
-			this.color = color;
+			this.Transform.Scale = new Vector3(25, 150, 1);
+			this.color = Color.RayWhite;
 		}
 
-		public override void Tick(float dt)
+		/*public override void Tick(float dt)
 		{
-			if (!this.Player.IsLocalPlayer)
+			if (!this.GetNetworkPlayer<PongNetworkPlayer>().IsLocalPlayer)
 			{
 				return;
 			}
-			
-			if (Raylib.IsKeyDown(KeyboardKey.W))
-			{
-				this.Transform.Velocity -= Vector2.UnitY * 100 * dt;
-			}
-
-			if (Raylib.IsKeyDown(KeyboardKey.S))
-			{
-				this.Transform.Velocity += Vector2.UnitY * 100 * dt;
-			}
-		}
+		}*/
 
 		public override void Render()
 		{
-			Raylib.DrawRectangleV(this.Transform.Position, this.Transform.Size, this.color);
+			Vector2 position = new(this.Transform.Position.X, this.Transform.Position.Y);
+			Vector2 size = new(this.Transform.Scale.X, this.Transform.Scale.Y);
+
+			Raylib.DrawRectangleV(position, size, this.color);
 		}
-	}*/
+	}
 }

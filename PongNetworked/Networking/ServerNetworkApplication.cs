@@ -28,5 +28,7 @@ namespace Pong.Networking
 		protected override void Shutdown(Network network)
 		{
 		}
+
+		protected override float GetFrameTime() => 0;
 	}
 }

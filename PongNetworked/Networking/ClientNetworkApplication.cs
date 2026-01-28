@@ -1,4 +1,5 @@
 ﻿using DaisNET.Networking;
+using DaisNET.Networking.Gameplay;
 using Pong.Client;
 using Raylib_cs;
 
@@ -22,18 +23,13 @@ namespace Pong.Networking
 
 		protected override void Tick(Network network)
 		{
-			/*foreach (Actor<PongNetworkPlayer> actor in network.Actors)
-			{
-				actor.Tick(Raylib.GetFrameTime());
-			}*/
-
 			Raylib.BeginDrawing();
 			Raylib.ClearBackground(Color.RayWhite);
 
-			/*foreach (Actor<PongNetworkPlayer> actor in network.Actors)
+			foreach ((Guid _, Actor actor) in network.World)
 			{
 				actor.Render();
-			}*/
+			}
 
 			Raylib.EndDrawing();
 		}
@@ -44,5 +40,7 @@ namespace Pong.Networking
 
 			Raylib.SetTraceLogCallback(&Logging.LogConsole);
 		}
+
+		protected override float GetFrameTime() => Raylib.GetFrameTime();
 	}
 }
